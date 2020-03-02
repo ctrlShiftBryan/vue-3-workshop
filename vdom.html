@@ -1,4 +1,11 @@
+<style>
+.red {
+  color: red;
+}
+</style>
+
 <div id="app"></div>
+
 <script>
 function h(tag, props, children) {
   return {
@@ -6,9 +13,10 @@ function h(tag, props, children) {
   }
 }
 
-function mount(vnode, container) { 
+function mount(vnode, container, anchor) { 
   //create element
   let element = document.createElement(vnode.tag);
+  vnode.el = element;
 
   //handle props
   for (const key in vnode.props) {
@@ -18,7 +26,7 @@ function mount(vnode, container) {
   // handle children
   // when string
   if (typeof vnode.children === 'string') {
-    el.textContent = vnode.children
+    element.textContent = vnode.children
   }  
   // when array 
   else {
@@ -27,14 +35,44 @@ function mount(vnode, container) {
     })
   }
 
-
+ // mount it
  container.appendChild(element)
 }
 
-const tree = h('div', null, [
+function patch(n1, n2) {
+  el = n2.el = n1.el;
+
+  // check if they are the same type
+  if (n1.tag === n2.tag) {
+    const oldProps = n1.props || {};
+    const newProps = n2.props || {};
+
+    for ( const key in newProps) {
+      if(newProps[key] !== oldProps[key]) {
+        if(newProps[key] !== null) {
+          el.setAttribute(key, newProps[key]);
+        }
+      }
+    }
+
+  } else {
+    unmount()
+    mount(n2, el.parentNode)
+  }
+  
+}
+
+const tree1 = h('div',  { class: 'red' }, [
   h('span', null, 'hello'),
   h('span', null, 'world')
 ])
 
-mount(tree, document.querySelector('#app'))
+const tree2 = h('div',  { class: 'green' }, [
+  h('span', null, 'hello'),
+  h('span', null, 'world')
+])
+
+mount(tree1, document.querySelector('#app'))
+
+patch(tree1, tree2)
 </script>

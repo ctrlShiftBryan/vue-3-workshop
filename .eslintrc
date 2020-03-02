@@ -1,0 +1,43 @@
+{
+  "root": true,
+  "parserOptions": {
+    "parser": "babel-eslint",
+    "ecmaVersion": 2017,
+    "sourceType": "module"
+  },
+  "plugins": ["jest", "vue", "cypress", "chai-friendly"],
+  "extends": [
+    "plugin:vue/recommended",
+    "plugin:jest/recommended",
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
+  "env": {
+    "jest/globals": true,
+    "cypress/globals": true
+  },
+  "rules": {
+    "chai-friendly/no-unused-expressions": 2,
+    "quotes": [
+      "error",
+      "single",
+      { "avoidEscape": true, "allowTemplateLiterals": false }
+    ],
+    "prefer-const": ["error", {
+      "destructuring": "any",
+      "ignoreReadBeforeAssign": false
+    }],
+    "prefer-arrow-callback": ["error"],
+    "prettier/prettier": ["error", { "singleQuote": true }],
+    "vue/max-attributes-per-line": [
+      2,
+      {
+        "singleline": 3,
+        "multiline": {
+          "max": 1,
+          "allowFirstLine": true
+        }
+      }
+    ]
+  }
+}
