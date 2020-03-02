@@ -1,0 +1,40 @@
+<div id="app"></div>
+<script>
+function h(tag, props, children) {
+  return {
+    tag, props, children
+  }
+}
+
+function mount(vnode, container) { 
+  //create element
+  let element = document.createElement(vnode.tag);
+
+  //handle props
+  for (const key in vnode.props) {
+    element.setAttribute(key, vnode.props[key])
+  }
+
+  // handle children
+  // when string
+  if (typeof vnode.children === 'string') {
+    el.textContent = vnode.children
+  }  
+  // when array 
+  else {
+    vnode.children.forEach(child => {
+      mount(child, element)
+    })
+  }
+
+
+ container.appendChild(element)
+}
+
+const tree = h('div', null, [
+  h('span', null, 'hello'),
+  h('span', null, 'world')
+])
+
+mount(tree, document.querySelector('#app'))
+</script>

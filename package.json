@@ -1,0 +1,10 @@
+{
+  "name": "vue-3-workshop",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Bryan Arendt <barendt@covermymeds.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^6.8.0"
+  }
+}
