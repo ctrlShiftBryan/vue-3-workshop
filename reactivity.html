@@ -1,26 +1,49 @@
 <script>
-  let activeEffect;
-  class Dep {
-    subscribers = new Set()
-    depend() {
+let activeEffect
+
+class Dep {
+  subscribers = new Set()
+  depend() {
+    if (activeEffect) {
       this.subscribers.add(activeEffect)
     }
-    notify() {
-      this.subscribers.forEach(effect => effect())
-    }
   }
-
-  function watchEffect(effect) {
-    activeEffect = effect;
-    effect()
+  notify() {
+    this.subscribers.forEach(effect => effect())
   }
+}
 
-  const dep = new Dep()
+function watchEffect(effect) {
+  activeEffect = effect
+  effect()
+}
 
-  watchEffect(() => {
-    console.log('effect is run')
-    dep.depend()
-  }) //effect is run
+const dep = new Dep()
 
-  dep.notify(); //effect is run
+function reactive(raw) {
+  const obj = {};
+  for (var key in raw) {
+    Object.defineProperty(obj, key, {
+      get() {  dep.depend(); return raw[key]; },
+      set(newValue) { raw[key] = newValue; dep.notify(); }
+    });
+  }
+  return obj;
+}
+
+// usage -----------------------
+const state = reactive({
+  count: 0,
+  count2: 99
+})
+
+watchEffect(() => {
+  console.log('watched', state.count)
+}) // 0
+
+watchEffect(() => {
+  console.log('watched2', state.count2)
+}) // 0
+
+state.count++ // 1
 </script>
