@@ -16,20 +16,31 @@ class Dep {
 function watchEffect(effect) {
   activeEffect = effect
   effect()
-  activeEffect = null;
+  activeEffect = null
 }
 
-
 function reactive(raw) {
-  const obj = {};
-  for (var key in raw) {
+  // use Object.defineProperty
+  // 1. iterate over the existing keys
+  Object.keys(raw).forEach(key => {
+    // 2. for each key: create a corresponding dep
     const dep = new Dep()
-    Object.defineProperty(obj, key, {
-      get() {  dep.depend(); return raw[key]; },
-      set(newValue) { raw[key] = newValue; dep.notify(); }
-    });
-  }
-  return obj;
+
+    // 3. rewrite the property into getter/setter
+    let realValue = raw[key]
+    Object.defineProperty(raw, key, {
+      get() {
+        // 4. call dep methods inside getter/setter
+        dep.depend()
+        return realValue
+      },
+      set(newValue) {
+        realValue = newValue
+        dep.notify()
+      }
+    })
+  })
+  return raw
 }
 
 // usage -----------------------
@@ -39,12 +50,8 @@ const state = reactive({
 })
 
 watchEffect(() => {
-  console.log('watched', state.count)
+  console.log(state.count)
 }) // 0
 
-watchEffect(() => {
-  console.log('watched2', state.count2)
-}) // 0
-
-state.count++;
+state.count++ // 1
 </script>
