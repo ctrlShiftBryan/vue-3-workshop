@@ -16,13 +16,14 @@ class Dep {
 function watchEffect(effect) {
   activeEffect = effect
   effect()
+  activeEffect = null;
 }
 
-const dep = new Dep()
 
 function reactive(raw) {
   const obj = {};
   for (var key in raw) {
+    const dep = new Dep()
     Object.defineProperty(obj, key, {
       get() {  dep.depend(); return raw[key]; },
       set(newValue) { raw[key] = newValue; dep.notify(); }
@@ -45,5 +46,5 @@ watchEffect(() => {
   console.log('watched2', state.count2)
 }) // 0
 
-state.count++ // 1
+state.count++;
 </script>
