@@ -2,77 +2,116 @@
 .red {
   color: red;
 }
+.green {
+  color: green;
+}
 </style>
 
 <div id="app"></div>
 
 <script>
 function h(tag, props, children) {
-  return {
-    tag, props, children
-  }
-}
-
-function mount(vnode, container, anchor) { 
-  //create element
-  let element = document.createElement(vnode.tag);
-  vnode.el = element;
-
-  //handle props
-  for (const key in vnode.props) {
-    element.setAttribute(key, vnode.props[key])
+    return { tag, props, children };
   }
 
-  // handle children
-  // when string
-  if (typeof vnode.children === 'string') {
-    element.textContent = vnode.children
-  }  
-  // when array 
-  else {
-    vnode.children.forEach(child => {
-      mount(child, element)
-    })
+  function mount(vnode, container, anchor) {
+    const el = document.createElement(vnode.tag);
+    vnode.el = el;
+    // props
+    if (vnode.props) {
+      for (const key in vnode.props) {
+        el.setAttribute(key, vnode.props[key]);
+      }
+    }
+    if (vnode.children) {
+      if (typeof vnode.children === "string") {
+        el.textContent = vnode.children;
+      } else {
+        vnode.children.forEach(child => {
+          mount(child, el);
+        });
+      }
+    }
+    if (anchor) {
+      container.insertBefore(el, anchor)
+    } else {
+      container.appendChild(el);
+    }
   }
 
- // mount it
- container.appendChild(element)
-}
+  const tree1 = h("div", { class: "red" }, [
+    h("span", null, "hello"),
+    h("span", null, "world")
+  ]);
 
-function patch(n1, n2) {
-  el = n2.el = n1.el;
+  mount(tree1, document.querySelector("#app"));
 
-  // check if they are the same type
-  if (n1.tag === n2.tag) {
-    const oldProps = n1.props || {};
-    const newProps = n2.props || {};
+  function patch(n1, n2) {
+    // Implement this
+    // 1. check if n1 and n2 are of the same type
+    if (n1.tag !== n2.tag) {
+      // 2. if not, replace
+      const parent = n1.el.parentNode
+      const anchor = n1.el.nextSibling
+      parent.removeChild(n1.el)
+      mount(n2, parent, anchor)
+      return
+    }
 
-    for ( const key in newProps) {
-      if(newProps[key] !== oldProps[key]) {
-        if(newProps[key] !== null) {
-          el.setAttribute(key, newProps[key]);
+    const el = n2.el = n1.el
+
+    // 3. if yes
+    // 3.1 diff props
+    const oldProps = n1.props || {}
+    const newProps = n2.props || {}
+    for (const key in newProps) {
+      const newValue = newProps[key]
+      const oldValue = oldProps[key]
+      if (newValue !== oldValue) {
+        if (newValue != null) {
+          el.setAttribute(key, newValue)
+        } else {
+          el.removeAttribute(key)
         }
       }
     }
-
-  } else {
-    unmount()
-    mount(n2, el.parentNode)
+    for (const key in oldProps) {
+      if (!(key in newProps)) {
+        el.removeAttribute(key)
+      }
+    }
+    // 3.2 diff children
+    const oc = n1.children
+    const nc = n2.children
+    if (typeof nc === 'string') {
+      if (nc !== oc) {
+        el.textContent = nc
+      }
+    } else if (Array.isArray(nc)) {
+      if (Array.isArray(oc)) {
+        // array diff
+        const commonLength = Math.min(oc.length, nc.length)
+        for (let i = 0; i < commonLength; i++) {
+          patch(oc[i], nc[i])
+        }
+        if (nc.length > oc.length) {
+          nc.slice(oc.length).forEach(c => mount(c, el))
+        } else if (oc.length > nc.length) {
+          oc.slice(nc.length).forEach(c => {
+            el.removeChild(c.el)
+          })
+        }
+      } else {
+        el.innerHTML = ''
+        nc.forEach(c => mount(c, el))
+      }
+    }
   }
-  
-}
 
-const tree1 = h('div',  { class: 'red' }, [
-  h('span', null, 'hello'),
-  h('span', null, 'world')
-])
+  const tree2 = h("div", { class: "green" }, [
+    h("span", null, "this has "),
+    h("span", null, "changed")
+  ]);
 
-const tree2 = h('div',  { class: 'green' }, [
-  h('span', null, 'hello'),
-  h('span', null, 'world')
-])
-
-mount(tree1, document.querySelector('#app'))
-
-patch(tree1, tree2)
+  patch(tree1, tree2);
 </script>
