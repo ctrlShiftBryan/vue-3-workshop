@@ -18,4 +18,10 @@ feature components vs reusable components used by developers
 
 -- stack componetn example
 
+----
+reactivity 
+  vue2 
+    getters / setters
+  vue3
+    proxies
 

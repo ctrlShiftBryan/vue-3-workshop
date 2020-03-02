@@ -1,0 +1,26 @@
+<script>
+  let activeEffect;
+  class Dep {
+    subscribers = new Set()
+    depend() {
+      this.subscribers.add(activeEffect)
+    }
+    notify() {
+      this.subscribers.forEach(effect => effect())
+    }
+  }
+
+  function watchEffect(effect) {
+    activeEffect = effect;
+    effect()
+  }
+
+  const dep = new Dep()
+
+  watchEffect(() => {
+    console.log('effect is run')
+    dep.depend()
+  }) //effect is run
+
+  dep.notify(); //effect is run
+</script>
